@@ -1,103 +1,38 @@
-# Enterprise-Data-Governance-Quality-Audit
+# 🍽️ Restaurant Menu Management System
 
-An end-to-end Data Governance framework and Data Quality audit conducted on an Enterprise Sales Dataset. This project demonstrates the transformation of unmodeled raw flat-file data into a structured **Star Schema**, implementation of enterprise **Metadata & Business Glossaries**, and deployment of an actionable **Data Quality Dashboard** in Power BI.
----
-## 📌 Executive Summary
+## 📌 Overview
+This project is a **C++ based Menu Management System** that leverages the **Array Data Structure** to solve critical business challenges in the food and beverage industry. 
 
-* **Overall Data Health Index:** `86.5%`
-* **Core Bottleneck Identified:** Net Revenue Logic Errors (`62.1%` accuracy rate)
-* **Primary Source of Errors:** Concentrated in the **Marketing** and **UNKNOWN** departmental units.
-* **Actionable Remediation:** Integrated dynamic filtering (`Total_Bad_Records > 0`) for immediate Data Steward intervention.
+Instead of just writing code, this project is designed from a business perspective to ensure menu quality, adapt to economic changes (like inflation), and prevent costly human errors during rush hours.
 
----
+## 💼 Business Problems Solved
 
-## 🏗️ Data Architecture (Star Schema)
+### 1. Combating Menu Bloat & Maintaining Quality
+* **The Business Problem:** Restaurants often add too many items to their menus, leading to food waste, slower kitchen times, and decreased overall food quality.
+* **The Technical Solution:** By deliberately utilizing a static **Array** with a strict `Size` limit, the `Append` feature enforces a capacity cap. If the menu is full, the system actively blocks new additions. This forces management to analyze sales, remove underperforming items, and maintain a focused, highly profitable menu.
 
-The original flat CSV dataset was decoupled in Power Query to enforce relational integrity, improve DAX model performance, and safeguard sensitive customer attributes under **Personally Identifiable Information (PII)** guidelines.
+### 2. Adapting to Inflation & Dynamic Pricing
+* **The Business Problem:** Fluctuating ingredient costs require restaurants to update their prices frequently. Slow systems cause delays and financial losses.
+* **The Technical Solution:** The system features a targeted `Update` function. Managers can instantly search for a meal and modify its price on the fly without having to delete and re-enter the entire meal profile, saving valuable time.
 
-```text
-       ┌──────────────────┐               ┌──────────────────┐
-       │   Dim_Customer   │               │  Dim_Department  │
-       ├──────────────────┤               ├──────────────────┤
-       │ PK  cust_id      │               │ PK  dept_id      │
-       │     full_name    │               │     dept_owner   │
-       │     email        │               └────────┬─────────┘
-       │     birth_date   │                        │ 1
-       └────────┬─────────┘                        │
-                │ 1                                │
-                │                                  │
-                └──────────────┐  ┌────────────────┘
-                               │  │
-                               ▼  ▼ *
-                      ┌──────────────────┐
-                      │    Fact_Sales    │
-                      ├──────────────────┤
-                      │ FK  cust_id      │
-                      │ FK  dept_owner   │
-                      │     gross_revenue│
-                      │     discount_amt │
-                      │     net_revenue  │
-                      │     status_code  │
-                      │     [DQ Flags]   │
-                      └──────────────────┘
-## 📖 Business Glossary & Data Quality Rules
+### 3. Preventing Human Data-Entry Errors
+* **The Business Problem:** Cashiers and managers working under pressure often make data-entry mistakes, such as accidentally typing the exact same name when trying to update a meal, causing database confusion.
+* **The Technical Solution:** Built-in smart validation within the update logic. If a user attempts to rename a meal to its exact current name, the system detects the redundancy, blocks the action, and prompts the user to enter a valid new name.
 
-| Metric / Term | Business Definition | Technical Rule / Expression | Target Quality Flag |
-| :--- | :--- | :--- | :--- |
-| **Gross Revenue** | Transaction total prior to discounts. Must be non-negative. | Gross >= 0 | Is_Valid_Revenue |
-| **Net Revenue** | Final realized transaction amount after discount applied. | Net = Gross - Discount | Is_Valid_net_Logic |
-| **Name Completeness** | Ensures full customer identity tracking without missing strings. | full_name is not null / whitespace | Is_Complete_Name |
-| **Email Validity** | Validates standardized email syntax formatting (@ presence). | Valid string pattern parsing | Is_Valid_Email |
+### 4. Accelerating Customer Service
+* **The Business Problem:** Customers expect quick answers about meal availability and prices. Slow database queries lead to long queues.
+* **The Technical Solution:** The `Search` and `Display` functions provide instantaneous access to the menu data. Cashiers can retrieve the entire menu or a specific meal's details in a fraction of a second, ensuring a smooth customer experience.
 
----
+### 5. Seamless Rebranding & Menu Overhauls
+* **The Business Problem:** Completely changing a meal's identity (Name and Price) usually requires deleting the old record and creating a new one from scratch.
+* **The Technical Solution:** A dual-update mode allows management to overwrite both the name and the price of an existing menu slot simultaneously, making seasonal updates and rebranding highly efficient.
 
-## 🚨 Identified Issues & Data Quality Audit Log
+## 🛠️ Tech Stack & Concepts Used
+* **Language:** C++
+* **Core Data Structure:** Static Arrays
+* **Core Concepts:** Object-Oriented Programming (OOP), Pointers, User Input Validation, System Design.
 
-1. **Whitespace & Empty String Anomaly (Completeness):**
-   * **Issue:** Blank entries encoded as empty text (`""`) rather than formal SQL `null`s, bypassing basic checks.
-   * **Remediation:** Applied Power Query `Text.Trim` transformations and replaced empty strings with proper `null` values.
-
-2. **Syntax Corruption in Emails (Validity):**
-   * **Issue:** Emails containing structural corruption (e.g., `_at_` instead of `@`).
-   * **Remediation:** Flagged via parsing logic; bad records routed for automated CRM cleaning.
-
-3. **Cross-Field Data Mismatch (Consistency):**
-   * **Issue:** Inconsistencies between customer names and associated email handles (e.g., mismatched identity records).
-   * **Remediation:** Assigned to Master Data Management (MDM) team for identity resolution.
-
-4. **Business Rule Logic Errors (Accuracy):**
-   * **Issue:** System calculation bugs causing negative gross values and invalid net revenue equations.
-   * **Remediation:** Implemented DAX audit measures and flagged bad transactional rows.
-
----
-
-## 📊 Interactive Data Quality Dashboard
-
-Below is the Power BI Data Quality & Governance Dashboard constructed for executive overview and steward-level remediation:
-
-![Data Quality Dashboard](image_6b2b68.jpg)
-
-### Key Metric Breakdown:
-* **Name Completeness Rate:** 93.1%
-* **Email Validity Rate:** 93.3%
-* **Gross Revenue Validity Rate:** 97.3%
-* **Net Revenue Logic Rate:** 62.1%
-
----
-
-## 🛠️ Tech Stack & Tools Used
-
-* **Power BI Desktop:** Data Modeling, DAX Measures, & Interactive UI.
-* **Power Query (M Engine):** Data Extraction, Transformation, Cleansing, and Custom Flags.
-* **Python:** Synthetic Data Generation & Corruption Simulation.
-* **Documentation:** LaTeX, Markdown, & MS Word / PDF Reporting.
-
----
-
-## 📁 Repository Structure
-
-```text
-├── Data Governance & Quality Project.pdf   # Complete Executive & Technical Governance Report
-├── Enterprise_Data_Governance.pbix         # Interactive Power BI Dashboard File
-├── image_6b2b68.jpg                       # Dashboard Screenshot for Preview
-└── README.md                               # Project Overview & Documentation
+## 🚀 How to Run the Project
+1. Clone this repository:
+   ```bash
+   git clone [https://github.com/YourUsername/Restaurant-Menu-Manager.git](https://github.com/YourUsername/Restaurant-Menu-Manager.git)
